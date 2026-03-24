@@ -30,6 +30,22 @@ urllib.request.urlretrieve(
 curl -O "https://static.philippdubach.com/data/options/spy/options.parquet"
 ```
 
+### Download All (Python, with parallel workers)
+
+```bash
+# Download all 104 tickers sequentially (default)
+python download.py
+
+# Download all 104 tickers using 8 parallel workers (~8× faster)
+python download.py --parallel 8
+
+# Download specific tickers in parallel
+python download.py -p 4 spy qqq tsla aapl nvda
+
+# List available tickers
+python download.py --list
+```
+
 ### Direct URLs
 
 Each ticker has two files:
@@ -98,6 +114,24 @@ vz    wfc   wmt   xom
 | `split_coefficient` | float | Split factor |
 
 ## Usage Examples
+
+### Python (polars) – fetch all tickers at once
+
+```python
+# examples/fetch_all_data.py demonstrates two approaches:
+
+# 1. Remote – no download needed
+from examples.fetch_all_data import fetch_all_remote
+lf = fetch_all_remote()                          # all 104 tickers
+lf_subset = fetch_all_remote(["spy", "qqq"])     # specific tickers
+
+# 2. Local – after running download.py
+from examples.fetch_all_data import fetch_all_local
+lf = fetch_all_local(data_dir="./data")
+
+# Both return a polars LazyFrame – filter before collecting to save memory
+df = lf.filter(pl.col("date") == "2025-12-16").collect()
+```
 
 ### Python (pandas)
 
